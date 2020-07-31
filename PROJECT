@@ -1,0 +1,11 @@
+domain: ppw.example.com
+layout: go.kubebuilder.io/v2
+projectName: ppw-operator
+repo: github.com/safronovD/ppw-operator
+resources:
+- group: apps
+  kind: Ppw
+  version: v1alpha0
+version: 3-alpha
+plugins:
+  go.sdk.operatorframework.io/v2-alpha: {}

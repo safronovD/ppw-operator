@@ -1,0 +1,7 @@
+apiVersion: apps.ppw.example.com/v1alpha0
+kind: Ppw
+metadata:
+  name: ppw-sample
+spec:
+  size: 2
+

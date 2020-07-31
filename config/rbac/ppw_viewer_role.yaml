@@ -1,0 +1,20 @@
+# permissions for end users to view ppws.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ppw-viewer-role
+rules:
+- apiGroups:
+  - apps.ppw.example.com
+  resources:
+  - ppws
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps.ppw.example.com
+  resources:
+  - ppws/status
+  verbs:
+  - get
