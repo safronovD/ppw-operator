@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"reflect"
 
 	"github.com/go-logr/logr"
@@ -44,7 +45,8 @@ type PpwReconciler struct {
 // +kubebuilder:rbac:groups=apps.ppw.example.com,resources=ppws,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps.ppw.example.com,resources=ppws/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list
+// +kubebuilder:rbac:groups=core,resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete;
 
 func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
@@ -63,6 +65,24 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		// Error reading the object - requeue the request.
 		log.Error(err, "Failed to get Ppw")
+		return ctrl.Result{}, err
+	}
+
+	foundPVC := &corev1.PersistentVolumeClaim{}
+	err = r.Get(ctx, types.NamespacedName{Name: "data-pvc", Namespace: ppw.Namespace}, foundPVC)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new deployment
+		pvc := r.PVCForPpw(ppw)
+		log.Info("Creating a new Deployment", "Deployment.Namespace", pvc.Namespace, "Deployment.Name", pvc.Name)
+		err = r.Create(ctx, pvc)
+		if err != nil {
+			log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", pvc.Namespace, "Deployment.Name", pvc.Name)
+			return ctrl.Result{}, err
+		}
+		// Deployment created successfully - return and requeue
+		return ctrl.Result{Requeue: true}, nil
+	} else if err != nil {
+		log.Error(err, "Failed to get Deployment")
 		return ctrl.Result{}, err
 	}
 
@@ -143,11 +163,23 @@ func (r *PpwReconciler) deploymentForPpw(ppw *appsv1alpha0.Ppw) *appsv1.Deployme
 					Labels: ls,
 				},
 				Spec: corev1.PodSpec{
+					Volumes: []corev1.Volume{{
+						Name: "data-volume",
+						VolumeSource: corev1.VolumeSource{
+							PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+								ClaimName: "data-pvc",
+								ReadOnly:  false,
+							}},
+					}},
 					Containers: []corev1.Container{{
 						Image: "dxd360/ppw-server",
 						Name:  "ppw-server",
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 666,
+						}},
+						VolumeMounts: []corev1.VolumeMount{{
+							Name:      "data-pvc",
+							MountPath: "/usr/src/app/data",
 						}},
 					}},
 				},
@@ -156,6 +188,29 @@ func (r *PpwReconciler) deploymentForPpw(ppw *appsv1alpha0.Ppw) *appsv1.Deployme
 	}
 	ctrl.SetControllerReference(ppw, dep, r.Scheme)
 	return dep
+}
+
+func (r *PpwReconciler) PVCForPpw(ppw *appsv1alpha0.Ppw) *corev1.PersistentVolumeClaim {
+	storageClassName := ppw.Spec.StorageClassName
+
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "data-pvc",
+			Namespace: ppw.Namespace,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteMany},
+			StorageClassName: &storageClassName,
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse("10Gi"),
+				},
+			},
+		},
+	}
+
+	ctrl.SetControllerReference(ppw, pvc, r.Scheme)
+	return pvc
 }
 
 func labelsForPpw(name string) map[string]string {

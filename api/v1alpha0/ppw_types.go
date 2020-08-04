@@ -29,7 +29,8 @@ type PpwSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Ppw. Edit Ppw_types.go to remove/update
-	Size int32 `json:"size"`
+	Size             int32  `json:"size"`
+	StorageClassName string `json:"storageClassName"`
 }
 
 // PpwStatus defines the observed state of Ppw
