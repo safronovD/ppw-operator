@@ -7,7 +7,7 @@ on:
 env:
   IMAGE_NAME: ppw-operator
   VERSION: latest
-  IMAGE_ID: docker.pkg.github.com/safronovD/ppw-operator/$IMAGE_NAME
+  IMAGE_ID: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
   
 jobs:
   dockerize:
