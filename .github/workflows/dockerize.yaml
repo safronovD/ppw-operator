@@ -1,4 +1,4 @@
-name: Building and push image
+name: Ppw image
 
 on:
   push:
@@ -23,5 +23,6 @@ jobs:
 
       - name: Push image
         run: |
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION

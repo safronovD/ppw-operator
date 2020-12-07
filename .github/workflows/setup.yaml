@@ -1,14 +1,14 @@
-name: Build
+name: Ppw-operator fully build
 
 on:
   workflow_dispatch:
-  push:
-    branches: [dev]
+#  push:
+#    branches: [dev]
   
 jobs:
-  build:
-    name: Building operator
-    runs-on: ubuntu-latest
+  setup:
+    name: Setup enviroment
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.3.4
@@ -18,10 +18,7 @@ jobs:
         with:
           go-version: ^1.15
           
-      - name: Building app
-        run: |
-          go env
-          make generate
-          make manifests
-          make install
+      - name: Setting up
+        run: make setup
+
           
