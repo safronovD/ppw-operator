@@ -6,8 +6,8 @@ on:
 
 env:
   IMAGE_NAME: ppw-operator
-  VERSION: latest
-  IMAGE_ID: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+  VERSION: ^v0.0.1
+  IMAGE_REGISTRY: docker.pkg.github.com
   
 jobs:
   dockerize:
@@ -23,6 +23,12 @@ jobs:
 
       - name: Push image
         run: |
+          IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          echo $IMAGE_ID
+          echo $IMAGE_NAME
+          echo $VERSION
+          echo $IMAGE_REGISTRY
+
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
