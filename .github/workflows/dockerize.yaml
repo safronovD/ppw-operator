@@ -16,19 +16,13 @@ jobs:
       - uses: actions/checkout@v2
         
       - name: Build image
-        run: docker build . -f Dockerfile -t $IMAGE_NAME
+        run: |
+          IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME:$VERSION
+          docker build . -f Dockerfile -t $IMAGE_ID
 
       - name: Log into registry
         run: echo "${{ secrets.GITPKGS_PASSWORD }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
-          IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          echo $IMAGE_ID
-          echo $IMAGE_NAME
-          echo $VERSION
-          echo $IMAGE_REGISTRY
-
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
