@@ -19,23 +19,16 @@ jobs:
           echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
           sudo apt-get update && sudo apt-get install -y kubectl
 
-      - name: Set up kube_config
-        run: |
-          mkdir -p ~/.kube
-          echo ${{ secrets.KUBE_CONFIG_DATA }} > ~/.kube/config
-          sudo chmod +r ~/.kube/config
-          kubectl get node
-
-      - name: Set up kube_config
-        run: |
-          mkdir -p ~/.kube
-          echo ${{ secrets.KUBE_CONFIG_DATA }} > ~/.kube/config
-          sudo chmod +r ~/.kube/config
-          kubectl get node
-
       - name: deploy to cluster
-          uses: steebchen/kubectl@master
-          env:
-            KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-          with:
-            args: apply -f https://k8s.io/examples/application/shell-demo.yaml
+        uses: steebchen/kubectl@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: apply -f https://k8s.io/examples/application/shell-demo.yaml
+
+      - name: Set up kube_config
+        run: |
+          mkdir -p ~/.kube
+          echo ${{ secrets.KUBE_CONFIG_DATA }} > ~/.kube/config
+          sudo chmod +r ~/.kube/config
+          kubectl get node
