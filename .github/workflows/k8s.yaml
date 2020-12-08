@@ -19,5 +19,10 @@ jobs:
           echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
           sudo apt-get update
           sudo apt-get install -y kubectl
-          echo ${{ secrets.TEST_SECRET }} > a.txt
-          cat a.txt
+
+      - name: Set up kube_config
+        run: |
+          mkdir ~/.kube
+          echo ${{ secrets.KUBE_CONFIG_DATA }} > ~/.kube/config
+          sudo chmod +r ~/.kube/config
+          kubectl get node
