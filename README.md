@@ -2,13 +2,53 @@
 
 Operator for https://github.com/safronovD/python-pravega-writer
 
-## Deploy
-```bash
-make generate
-make manifests
-make install
-docker build . -t dxd360/ppw-operator:0.0.1
-docker push dxd360/ppw-operator:0.0.1
-make deploy IMG=dxd360/ppw-operator:0.0.1
+## Setup
+```ShellSession
+# Go 1.13
+...
+
+# gcc
+sudo apt update
+sudo apt install build-essential
+
+# Configure Go
+mkdir -p ~/go_projects/{bin,src,pkg}
+export GOPATH="$HOME/go_projects"
+export GOBIN="$GOPATH/bin"
+export PATH=$PATH:"$GOBIN"
+```
+
+## Dependencies
+```ShellSession
+make all-dependencies
+```
+
+## Deploy controller
+```ShellSession
+make create-dir
+
+# Generate addition files
+# With controller-gen
+make generate-crds
+make generate-deepcopy
+
+# With kustomize
+make kustomize-crds
+make kustomize-controller IMG=${IMG}
+
+
+# Docker image
+make docker-build IMG=${IMG}
+make docker-push IMG=${IMG}
+
+
+# Deploy into a cluster
+make install-crds
+make deploy-controller
+```
+
+## Check (deploy ppw)
+```ShellSession
+sudo nano config/samples/apps_v1alpha0_ppw.yaml
 kubectl apply -f config/samples/apps_v1alpha0_ppw.yaml
 ```
