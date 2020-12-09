@@ -26,7 +26,7 @@ jobs:
 
       - name: Getting tag
         run: |
-          echo "Lolich"
+          echo "Lolicha"
           echo "GITHUBREF = ${{ github.ref }}"
 
       # - name: Push image
