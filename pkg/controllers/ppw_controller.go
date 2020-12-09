@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
-	appsv1alpha0 "github.com/safronovD/ppw-operator/api/v1alpha0"
+	appsv1alpha0 "github.com/safronovD/ppw-operator/pkg/api/v1alpha0"
 )
 
 // PpwReconciler reconciles a Ppw object

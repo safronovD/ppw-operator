@@ -34,19 +34,19 @@ test: fmt vet
 
 # Generate CRDs
 generate-crds:
-	controller-gen crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:dir=config/crd/bases
+	${GOBIN}/controller-gen crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:dir=config/crd/bases
 
 manifests: install-controller-gen generate-crds
 
 # Generate deepcopy functions for CRD
 generate-deepcopy:
-	controller-gen object paths="./..." output:dir=api/v1alpha0
+	${GOBIN}/controller-gen object paths="./..." output:dir=pkg/ntvg api/v1alpha0
 
 generate: install-controller-gen generate-deepcopy
 
 # Install CRDs into a cluster
 kustomize-crds:
-	kustomize build config/crd > ${OUT_CRD}
+	${GOBIN}/kustomize build config/crd > ${OUT_CRD}
 
 install-crds:
 	kubectl apply -f ${OUT_CRD}
@@ -60,8 +60,8 @@ delete-crds-all: manifests install-kustomize kustomize-crds delete-crds
 
 # Deploy controller into a cluster
 kustomize-controller:
-	cd config/manager && kustomize edit set image controller=${IMG}
-	kustomize build config/default > ${OUT_CONTROLLER}
+	cd config/manager && ${GOBIN}/kustomize edit set image controller=${IMG}
+	${GOBIN}/kustomize build config/default > ${OUT_CONTROLLER}
 
 deploy-controller:
 	kubectl apply -f ${OUT_CONTROLLER}

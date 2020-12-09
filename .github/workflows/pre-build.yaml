@@ -33,6 +33,11 @@ jobs:
       - name: Dependencies
         run: make all-dependencies
 
+      - name: Linting
+        run: |
+          make fmt
+          make vet
+
       - name: Generate deepcopy
         run: make generate-deepcopy
 
