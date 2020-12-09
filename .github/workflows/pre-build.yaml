@@ -26,13 +26,13 @@ jobs:
       - name: Dependencies
         run: make all-dependencies
 
+      - name: Generate deepcopy
+        run: make generate-deepcopy
+
       - name: Linting
         run: |
           make fmt
           make vet
-
-      - name: Generate deepcopy
-        run: make generate-deepcopy
 
       - name: Generate deploy yamls
         run: |
