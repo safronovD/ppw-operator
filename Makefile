@@ -15,10 +15,10 @@ dependency:
 	go mod download
 
 install-controller-gen:
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0
+	GO111MODULE=on go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0
 
 install-kustomize:
-	go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4
+	GO111MODULE=on go get sigs.k8s.io/kustomize/kustomize/v3
 
 all-dependencies: dependency install-controller-gen install-kustomize
 
