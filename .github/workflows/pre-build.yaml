@@ -25,8 +25,6 @@ jobs:
 
       - name: Set env vars
         run: |
-          export GOBIN=`go env GOPATH`/bin
-          export PATH=${PATH}:`go env GOPATH`/bin
           echo GOBIN=`go env GOPATH`/bin >> $GITHUB_ENV
 
       - name: Dependencies
@@ -42,6 +40,7 @@ jobs:
 
       - name: Generate deploy yamls
         run: |
+          make create-dir
           make generate-crds
           make kustomize-crds
           make kustomize-controller IMG=${IMG}
