@@ -13,7 +13,7 @@ jobs:
   dockerize:
     name: Dockerize ppw-operator
     runs-on: ubuntu-latest
-    #if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    if: "contains(github.event.head_commit.message, '[image]')"
     steps:
       - uses: actions/checkout@v2
         
