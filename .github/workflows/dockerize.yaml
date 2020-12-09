@@ -3,7 +3,7 @@ name: Ppw-operator dockerize app
 on:
   push:
     branches: [dev]
-    tags: ['*']
+    tags: ['v*']
 
 
 env:
@@ -14,24 +14,29 @@ jobs:
   dockerize:
     name: Dockerize ppw-operator
     runs-on: ubuntu-latest
-    #if: "contains(github.event.head_commit.message, 'pkg')"
+    if: "contains(github.event.head_commit.message, 'pkg')"
     steps:
       - uses: actions/checkout@v2
         
-      - name: Build image
-        run: docker build . -f Dockerfile -t $IMAGE_NAME
+      # - name: Build image
+      #   run: docker build . -f Dockerfile -t $IMAGE_NAME
 
-      - name: Log into registry
-        run: echo "${{ secrets.GITPKGS_PASSWORD }}" | docker login docker.pkg.github.com -u ${{ secrets.GITPKGS_USERNAME }} --password-stdin
+      # - name: Log into registry
+      #   run: echo "${{ secrets.GITPKGS_PASSWORD }}" | docker login docker.pkg.github.com -u ${{ secrets.GITPKGS_USERNAME }} --password-stdin
 
       - name: Getting tag
         run: |
-          echo "Lolicha"
+          IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
+          echo IMAGEID=$IMAGE_ID
           echo "GITHUBREF = ${{ github.ref }}"
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [[ "$VERSION" == "main"]] && VERSION=latest
+          echo VERSION=$VERSION
 
       # - name: Push image
-        # run: |
-        #   IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
-        #   IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-        #   docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-        #   docker push $IMAGE_ID:$VERSION
+      #   run: |
+      #     IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
+      #     IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+      #     docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+      #     docker push $IMAGE_ID:$VERSION
