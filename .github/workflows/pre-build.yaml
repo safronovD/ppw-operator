@@ -23,6 +23,12 @@ jobs:
       - name: Set up gcc
         run: sudo apt update && sudo apt install build-essential
 
+      - name: Configure Go
+        run: |
+          mkdir -p ~/go_projects/{bin,src,pkg}
+          export GOPATH="$HOME/go_projects"
+          export GOBIN="$GOPATH/bin"
+
       - name: Dependencies
         run: make all-dependencies
 

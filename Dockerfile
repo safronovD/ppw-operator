@@ -7,8 +7,8 @@ COPY go.mod go.mod
 RUN go mod download
 
 COPY cmd/main.go main.go
-COPY pkg/api api/
-COPY pkg/controllers controllers/
+COPY pkg/api pkg/api/
+COPY pkg/controllers pkg/controllers/
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
 
