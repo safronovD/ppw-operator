@@ -2,8 +2,8 @@ name: Ppw-operator dockerize app
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [dev]
+    tags: ['*']
 
 env:
   IMAGE_NAME: ppw-operator
@@ -13,7 +13,7 @@ jobs:
   dockerize:
     name: Dockerize ppw-operator
     runs-on: ubuntu-latest
-    #if: "contains(github.event.head_commit.message, '[image]')"
+    #if: "contains(github.event.head_commit.message, 'pkg')"
     steps:
       - uses: actions/checkout@v2
         
