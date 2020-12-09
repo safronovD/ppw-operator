@@ -25,7 +25,7 @@ jobs:
 
       - name: Set env vars
         run: |
-          echo GOBIN=${{ env.GOPATH }}/bin >> $GITHUB_ENV
+          echo GOBIN=${GOPATH}/bin >> $GITHUB_ENV
 
       - name: Dependencies
         run: make all-dependencies
