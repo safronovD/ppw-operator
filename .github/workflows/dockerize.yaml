@@ -3,7 +3,7 @@ name: Ppw-operator dockerize app
 on:
   push:
     tags:
-      - v*
+      - 'v*'
 
 env:
   IMAGE_NAME: ppw-operator
