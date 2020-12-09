@@ -32,6 +32,8 @@ jobs:
         run: make all-dependencies
 
       - name: Generate deepcopy
+        env:
+          GOBIN: `go env GOPATH`/bin
         run: make generate-deepcopy
 
       - name: Linting
