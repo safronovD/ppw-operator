@@ -40,7 +40,7 @@ manifests: install-controller-gen generate-crds
 
 # Generate deepcopy functions for CRD
 generate-deepcopy:
-	${GOBIN}/controller-gen object paths="./..." output:dir=pkg/ntvg api/v1alpha0
+	${GOBIN}/controller-gen object paths="./..." output:dir=pkg/api/v1alpha0
 
 generate: install-controller-gen generate-deepcopy
 
