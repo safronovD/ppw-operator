@@ -26,6 +26,7 @@ jobs:
       - name: Set env vars
         run: |
           export GOBIN=`go env GOPATH`/bin
+          export PATH=${PATH}:`go env GOPATH`/bin
 
       - name: Dependencies
         run: make all-dependencies
