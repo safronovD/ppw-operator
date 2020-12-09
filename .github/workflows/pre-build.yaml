@@ -18,16 +18,14 @@ jobs:
       - name: Set up Go 
         uses: actions/setup-go@v2.1.3
         with:
-          go-version: ^1.15
+          go-version: '^1.15'
           
       - name: Set up gcc
         run: sudo apt update && sudo apt install build-essential
 
-      - name: Configure Go
+      - name: Set env vars
         run: |
-          mkdir -p ~/go_projects/{bin,src,pkg}
-          export GOPATH="$HOME/go_projects"
-          export GOBIN="$GOPATH/bin"
+          echo GOBIN=${{ env.GOPATH }}/bin >> $GITHUB_ENV
 
       - name: Dependencies
         run: make all-dependencies
