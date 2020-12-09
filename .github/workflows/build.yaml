@@ -1,4 +1,4 @@
-name: Ppw-operator generate additions
+name: Ppw-operator build app
 
 on:
   push:
@@ -11,6 +11,7 @@ jobs:
   setup:
     name: Setup enviroment
     runs-on: ubuntu-18.04
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.3.4
@@ -18,8 +19,12 @@ jobs:
       - name: Set up Go 
         uses: actions/setup-go@v2.1.3
         with:
-          go-version: '^1.15'
+          go-version: ^1.15
           
+      - name: Show Go env
+        run: |
+          go env
+      
       - name: Set up gcc
         run: sudo apt update && sudo apt install build-essential
 
