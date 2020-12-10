@@ -30,6 +30,12 @@ jobs:
       - name: Generate deepcopy
         run: make generate-deepcopy
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: manager-gen
+          path: pkg/
+
   test:
     name: Test and linting
     runs-on: ubuntu-18.04
@@ -47,7 +53,13 @@ jobs:
 
       - name: Dependencies
         run: make all-dependencies
-      
+
+      - name: Downloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: manager-gen
+          path: pkg/
+
       - name: Linting
         run: |
           make fmt
@@ -59,7 +71,7 @@ jobs:
     needs: [build]
     steps:
       - uses: actions/checkout@v2.3.4
-      
+
       - name: Set up Go 
         uses: actions/setup-go@v2.1.3
         with:
