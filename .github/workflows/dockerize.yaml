@@ -1,23 +1,56 @@
-name: Ppw-operator dockerize app
+name: Publishing docker image
 
 on:
-  commit_comment: ['[pkg]']
-  push:
+  pull_request:
     branches: [main, release]
     tags: ['v*']
+  push:
+    branches: [dev] #TODO: remove after finish workflow
 
-
-env:
-  IMAGE_NAME: ppw-operator
-  IMAGE_REGISTRY: docker.pkg.github.com
   
 jobs:
+  build:
+    name: Generate dependencies
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - uses: actions/setup-go@v2.1.3
+        with:
+          go-version: ^1.15
+
+      - name: Setup environment
+        run: |
+          sudo apt update && sudo apt install build-essential
+          export GOBIN=$GOPATH/bin
+
+      - name: Dependencies
+        run: |
+          make all-dependencies
+          make generate-deepcopy
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: manager-gen
+          path: pkg/
+    
   dockerize:
     name: Dockerize ppw-operator
+    env:
+      IMAGE_NAME: ppw-operator
+      IMAGE_REGISTRY: docker.pkg.github.com
     runs-on: ubuntu-latest
+    needs: [build]
     if: "contains(github.event.head_commit.message, 'pkg')"
     steps:
       - uses: actions/checkout@v2
+
+      - name: Downloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: manager-gen
+          path: pkg/
         
       # - name: Build image
       #   run: docker build . -f Dockerfile -t $IMAGE_NAME
@@ -27,6 +60,7 @@ jobs:
 
       - name: Getting tag
         run: |
+          ls pkg/
           IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
           VERSION=latest
           VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
