@@ -1,6 +1,7 @@
 name: Ppw-operator dockerize app
 
 on:
+  commit_comment: ['[pkg]']
   push:
     branches: [main, release]
     tags: ['v*']
