@@ -1,4 +1,4 @@
-name: Ppw-operator build app
+name: CI on Dev Workflow
 
 on:
   push:
