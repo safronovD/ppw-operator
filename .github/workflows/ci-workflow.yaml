@@ -39,7 +39,7 @@ jobs:
   test:
     name: Test and linting
     runs-on: ubuntu-18.04
-    needs: [setup]
+    needs: [build]
     steps:
       - uses: actions/checkout@v2.3.4
 
@@ -60,7 +60,7 @@ jobs:
   generate:
     name: Generate yamls
     runs-on: ubuntu-18.04
-    needs: [setup]
+    needs: [build]
     steps:
       - uses: actions/checkout@v2.3.4
 

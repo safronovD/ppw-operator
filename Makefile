@@ -2,7 +2,7 @@
 VERSION ?= 0.0.1
 
 # Default constants
-IMG ?= controller:latest
+IMG ?= ppw-operator:latest
 OUT_DIR ?= ./deploy
 OUT_CRD ?= ${OUT_DIR}/crd.yaml
 OUT_CONTROLLER ?= ${OUT_DIR}/controller.yaml
