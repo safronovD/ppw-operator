@@ -53,11 +53,11 @@ jobs:
           name: manager-gen
           path: pkg/
         
-      # - name: Build image
-      #   run: docker build . -f Dockerfile -t $IMAGE_NAME
+      - name: Build image
+        run: docker build . -f Dockerfile -t $IMAGE_NAME
 
-      # - name: Log into registry
-      #   run: echo "${{ secrets.GITPKGS_PASSWORD }}" | docker login docker.pkg.github.com -u ${{ secrets.GITPKGS_USERNAME }} --password-stdin
+      - name: Log into registry
+        run: echo "${{ secrets.GITPKGS_PASSWORD }}" | docker login docker.pkg.github.com -u ${{ secrets.GITPKGS_USERNAME }} --password-stdin
 
       - name: Getting tag
         run: |
@@ -69,9 +69,9 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-      # - name: Push image
-      #   run: |
-      #     IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
-      #     IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-      #     docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-      #     docker push $IMAGE_ID:$VERSION
+      - name: Push image
+        run: |
+          IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
