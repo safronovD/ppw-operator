@@ -41,6 +41,7 @@ jobs:
     env:
       IMAGE_NAME: ppw-operator
       IMAGE_REGISTRY: docker.pkg.github.com
+      VERSION: latest
     runs-on: ubuntu-18.04
     needs: [build]
     if: "contains(github.event.head_commit.message, 'pkg')"
@@ -62,11 +63,8 @@ jobs:
       - name: Getting tag
         run: |
           ls pkg/
-          IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
-          VERSION=latest
           VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
-          echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
       - name: Push image
