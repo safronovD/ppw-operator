@@ -1,13 +1,10 @@
-name: CD Workflow
+name: CD on Main Workflow
 
 on:
   pull_request:
     branches: [main, release]
     tags: ['v*']
-  push:
-    branches: [dev] #TODO: remove after finish workflow
 
-  
 jobs:
   build:
     name: Generate dependencies
@@ -44,7 +41,7 @@ jobs:
       VERSION: latest
     runs-on: ubuntu-18.04
     needs: [build]
-    if: "contains(github.event.head_commit.message, 'pkg')"
+    if: "!contains(github.event.head_commit.message, 'pkg')"
     steps:
       - uses: actions/checkout@v2.3.4
 
