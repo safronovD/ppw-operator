@@ -27,7 +27,6 @@ jobs:
           VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
           echo VERSION=$VERSION
-          echo "::set-output name=version::$VERSION"
 
       - name: Creating image tag
         id: image_id_step
@@ -35,7 +34,6 @@ jobs:
           IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           echo IMAGE_ID=$IMAGE_ID
-          echo "::set-output name=image_id::$IMAGE_ID"
 
   build:
     name: Generate dependencies
@@ -54,9 +52,6 @@ jobs:
           sudo apt update && sudo apt install build-essential
           export GOBIN=$GOPATH/bin
           echo GOBIN=`go env GOPATH`/bin >> $GITHUB_ENV
-
-          echo "${{ jobs.tagging.steps.version_step.outputs.version }}"
-          echo "${{ jobs.tagging.steps.image_id_step.outputs.image_id }}"
 
       - name: Dependencies
         run: |
