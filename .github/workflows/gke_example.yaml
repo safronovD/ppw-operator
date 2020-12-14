@@ -1,12 +1,5 @@
 name: Build and Deploy to GKE
 
-on: [push]
-
-env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
-  GKE_ZONE: ${{ secrets.GCE_ZONE }}
-
 jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
