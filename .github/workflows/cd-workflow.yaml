@@ -1,9 +1,6 @@
 name: CD on Main Workflow
 
-on:
-  pull_request:
-    branches: [main, release]
-    tags: ['v*']
+on: [push]
 
 jobs:
   build:
