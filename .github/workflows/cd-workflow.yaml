@@ -2,13 +2,11 @@ name: CD on Main Workflow
 
 on:
   push:
-    branches: [dev]
+    branches: [main]
+    tags: [v*]
 
   pull_request:
-    branches: [main, release, test]
-    tags: [v*]
   
-
 env: 
   IMAGE_NAME: ppw-operator
   IMAGE_REGISTRY: docker.pkg.github.com
@@ -122,6 +120,7 @@ jobs:
         run: |
           VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
+          [ "$VERSION" == "main" ] && VERSION=latest
           echo VERSION=$VERSION >> $GITHUB_ENV
 
       - name: Push image
