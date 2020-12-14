@@ -10,7 +10,6 @@ on:
   
 
 env: 
-  IMAGE_ID: ''
   IMAGE_NAME: ppw-operator
   IMAGE_REGISTRY: docker.pkg.github.com
   VERSION: latest
@@ -28,11 +27,11 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
           echo VERSION=$VERSION
 
-      - name: Push image
+      - name: Creating image tag
         run: |
           IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          echo $IMAGE_ID
+          echo IMAGE_ID=$(echo $IMAGE_ID) >> $GITHUB_ENV
 
   build:
     name: Generate dependencies
