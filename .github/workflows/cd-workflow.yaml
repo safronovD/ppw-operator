@@ -25,6 +25,7 @@ jobs:
         run: |
           IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          echo $IMAGE_ID
 
   build:
     name: Generate dependencies
