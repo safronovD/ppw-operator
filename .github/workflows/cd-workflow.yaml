@@ -22,18 +22,26 @@ jobs:
       - uses: actions/checkout@v2.3.4
 
       - name: Getting tag
-        id: version_step
         run: |
           VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
-          echo VERSION=$VERSION
+          echo VERSION=$VERSION >> $GITHUB_ENV
 
       - name: Creating image tag
-        id: image_id_step
         run: |
           IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          echo IMAGE_ID=$IMAGE_ID
+          echo IMAGE_ID=$IMAGE_ID >> $GITHUB_ENV
+
+      - name: Collecting image id with cersion
+        run: |
+          echo $IMAGE_ID:$VERSION > ./out/imageid.conf
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: imageid
+          path: ./out
 
   build:
     name: Generate dependencies
@@ -53,6 +61,12 @@ jobs:
           export GOBIN=$GOPATH/bin
           echo GOBIN=`go env GOPATH`/bin >> $GITHUB_ENV
 
+      - name: Dowloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: imageid
+          path: ./out
+
       - name: Dependencies
         run: |
           make all-dependencies
@@ -60,6 +74,9 @@ jobs:
 
       - name: Generate deploy yamls
         run: |
+          IMAGE_ID=echo `cat ./out/imageid.conf`
+          echo $IMAGE_ID >> $GITHUB_ENV
+          echo IMAGE_ID=$IMAGE_ID
           make create-dir
           make generate-crds
           make kustomize-crds
