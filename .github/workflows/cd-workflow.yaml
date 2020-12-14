@@ -12,7 +12,6 @@ on:
 env: 
   IMAGE_NAME: ppw-operator
   IMAGE_REGISTRY: docker.pkg.github.com
-  VERSION: latest
 
 jobs:
   tagging:
@@ -123,7 +122,7 @@ jobs:
         run: |
           VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
-          echo VERSION=$VERSION
+          echo VERSION=$VERSION >> $GITHUB_ENV
 
       - name: Push image
         run: |
