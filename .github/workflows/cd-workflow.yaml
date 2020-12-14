@@ -24,11 +24,24 @@ jobs:
           make all-dependencies
           make generate-deepcopy
 
+      - name: Generate deploy yamls
+          run: |
+            make create-dir
+            make generate-crds
+            make kustomize-crds
+            make kustomize-controller IMG=$IMAGE_NAME
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2.2.1
         with:
           name: manager-gen
           path: pkg/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: yaml-files
+          path: deploy/
     
   dockerize:
     name: Dockerize ppw-operator
@@ -94,6 +107,12 @@ jobs:
       # Get the GKE credentials so we can deploy to the cluster
       - run: |-
           gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GCE_ZONE }}
+
+      - name: Downloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: yaml-files
+          path: deploy/
 
       - name: Kubectl deploy
         run: |
