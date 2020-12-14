@@ -75,7 +75,7 @@ jobs:
 
       - name: Generate deploy yamls
         run: |
-          IMAGE_ID=echo `cat ./out/imageid.conf`
+          IMAGE_ID=$(echo `cat ./out/imageid.conf`)
           echo $IMAGE_ID >> $GITHUB_ENV
           echo IMAGE_ID=$IMAGE_ID
           make create-dir
