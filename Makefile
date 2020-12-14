@@ -18,7 +18,7 @@ install-controller-gen:
 	GO111MODULE=on go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0
 
 install-kustomize:
-	GO111MODULE=on go get sigs.k8s.io/kustomize/kustomize/v3
+	GO111MODULE=on go get sigs.k8s.io/kustomize/kustomize/v3@v3.8.8
 
 all-dependencies: dependency install-controller-gen install-kustomize
 
