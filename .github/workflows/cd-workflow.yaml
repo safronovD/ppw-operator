@@ -35,6 +35,7 @@ jobs:
 
       - name: Collecting image id with cersion
         run: |
+          mkdir ./out/
           echo $IMAGE_ID:$VERSION > ./out/imageid.conf
 
       - name: Upload artifact
