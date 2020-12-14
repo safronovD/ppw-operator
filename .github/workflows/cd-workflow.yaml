@@ -25,11 +25,11 @@ jobs:
           make generate-deepcopy
 
       - name: Generate deploy yamls
-          run: |
-            make create-dir
-            make generate-crds
-            make kustomize-crds
-            make kustomize-controller IMG=$IMAGE_NAME
+        run: |
+          make create-dir
+          make generate-crds
+          make kustomize-crds
+          make kustomize-controller IMG=$IMAGE_NAME
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2.2.1
