@@ -1,6 +1,13 @@
 name: CD on Main Workflow
 
-on: [push]
+on:
+  push:
+    branches: [dev]
+
+  pull_request:
+    branches: [main, release]
+    tags: [v*]
+  
 
 env: 
   IMAGE_ID: ''
@@ -31,6 +38,7 @@ jobs:
     name: Generate dependencies
     runs-on: ubuntu-18.04
     if: "!contains(github.event.head_commit.message, 'ci skip')"
+    needs: [tagging]
     steps:
       - uses: actions/checkout@v2.3.4
 
@@ -54,7 +62,7 @@ jobs:
           make create-dir
           make generate-crds
           make kustomize-crds
-          make kustomize-controller IMG=$IMAGE_NAME
+          make kustomize-controller IMG=$IMAGE_ID
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2.2.1
