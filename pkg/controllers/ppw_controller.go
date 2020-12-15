@@ -161,6 +161,7 @@ func (r *PpwReconciler) ServerDeployment(ppw *appsv1alpha0.Ppw) *appsv1.Deployme
 	ls := labelsForPpw(ppw.Name)
 	replicas := ppw.Spec.Server.Size
 	image := ppw.Spec.Server.Image
+	imsec := ppw.Spec.Server.ImagePullSecret
 
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -178,11 +179,15 @@ func (r *PpwReconciler) ServerDeployment(ppw *appsv1alpha0.Ppw) *appsv1.Deployme
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image: image,
-						Name:  "ppw-server",
+						Image:           image,
+						Name:            "ppw-server",
+						ImagePullPolicy: corev1.PullAlways,
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 666,
 						}},
+					}},
+					ImagePullSecrets: []corev1.LocalObjectReference{{
+						Name: imsec,
 					}},
 				},
 			},

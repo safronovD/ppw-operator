@@ -22,21 +22,13 @@ import (
 
 // PpwSpec defines the desired state of Ppw
 type PpwSpec struct {
-	Processor struct {
-		Size    int32  `json:"size"`
-		PvcName string `json:"pvcName"`
-		Image   string `json:"image"`
-	} `json:"processor"`
+	Server Server `json:"server,omitempty"`
+}
 
-	Server struct {
-		Size  int32  `json:"size"`
-		Image string `json:"image"`
-	} `json:"server"`
-
-	mlController struct {
-		PvcName string `json:"pvcName"`
-		Image   string `json:"image"`
-	}
+type Server struct {
+	Size            int32  `json:"size,omitempty"`
+	Image           string `json:"image,omitempty"`
+	ImagePullSecret string `json:"imagePullSecret,omitempty"`
 }
 
 // PpwStatus defines the observed state of Ppw

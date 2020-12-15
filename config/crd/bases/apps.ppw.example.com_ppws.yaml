@@ -36,15 +36,16 @@ spec:
         spec:
           description: PpwSpec defines the desired state of Ppw
           properties:
-            size:
-              description: Foo is an example field of Ppw. Edit Ppw_types.go to remove/update
-              format: int32
-              type: integer
-            storageClassName:
-              type: string
-          required:
-          - size
-          - storageClassName
+            server:
+              properties:
+                image:
+                  type: string
+                imagePullSecret:
+                  type: string
+                size:
+                  format: int32
+                  type: integer
+              type: object
           type: object
         status:
           description: PpwStatus defines the observed state of Ppw

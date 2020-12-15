@@ -4,5 +4,6 @@ metadata:
   name: ppw-sample
 spec:
   server:
-    size:
-    image:
+    size: 2
+    image: docker.pkg.github.com/safronovd/python-pravega-writer/ppw-server:latest
+    imagePullSecret: github-pkg
