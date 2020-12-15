@@ -93,7 +93,7 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		found.Spec.Replicas = &size
 		err = r.Update(ctx, found)
 		if err != nil {
-			log.Error(err, "Failed to update Deployment", "Deployment.Namespace", serverDep.Namespace, "Deployment.Name", serverDep.Name)
+			log.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 			return ctrl.Result{}, err
 		}
 		// Spec updated - return and requeue
