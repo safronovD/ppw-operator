@@ -48,6 +48,7 @@ type PpwReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete;
 
 func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+
 	ctx := context.Background()
 	log := r.Log.WithValues("ppw", req.NamespacedName)
 
@@ -92,12 +93,43 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		found.Spec.Replicas = &size
 		err = r.Update(ctx, found)
 		if err != nil {
-			log.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
+			log.Error(err, "Failed to update Deployment", "Deployment.Namespace", serverDep.Namespace, "Deployment.Name", serverDep.Name)
 			return ctrl.Result{}, err
 		}
 		// Spec updated - return and requeue
 		return ctrl.Result{Requeue: true}, nil
 	}
+
+	//// Check if the server deployment already exists, if not create a new one
+	//processorDep := &appsv1.Deployment{}
+	//err = r.Get(ctx, types.NamespacedName{Name: ppw.Name, Namespace: ppw.Namespace}, processorDep)
+	//if err != nil && errors.IsNotFound(err) {
+	//	// Define a new deployment
+	//	dep := r.ProcessorDeployment(ppw)
+	//	log.Info("Creating a new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
+	//	err = r.Create(ctx, dep)
+	//	if err != nil {
+	//		log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
+	//		return ctrl.Result{}, err
+	//	}
+	//	// Deployment created successfully - return and requeue
+	//	return ctrl.Result{Requeue: true}, nil
+	//} else if err != nil {
+	//	log.Error(err, "Failed to get Deployment")
+	//	return ctrl.Result{}, err
+	//}
+	//
+	//size = ppw.Spec.Processor.Size
+	//if *processorDep.Spec.Replicas != size {
+	//	processorDep.Spec.Replicas = &size
+	//	err = r.Update(ctx, processorDep)
+	//	if err != nil {
+	//		log.Error(err, "Failed to update Deployment", "Deployment.Namespace", processorDep.Namespace, "Deployment.Name", processorDep.Name)
+	//		return ctrl.Result{}, err
+	//	}
+	//	// Spec updated - return and requeue
+	//	return ctrl.Result{Requeue: true}, nil
+	//}
 
 	// Update the Ppw status with the pod names
 	// List the pods for this ppw's deployment
