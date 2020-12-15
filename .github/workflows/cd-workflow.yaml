@@ -2,7 +2,7 @@ name: CD on Main Workflow
 
 on:
   push:
-    branches:
+    branches: [main, dev]
     tags: [v*]
 
   pull_request:
@@ -22,6 +22,8 @@ jobs:
         run: |
           VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
+          [ "$VERSION" == "main" ] && VERSION=latest
+          [ "$VERSION" == "" ] && VERSION=unstable
           echo VERSION=$VERSION >> $GITHUB_ENV
 
       - name: Creating image tag
@@ -105,9 +107,17 @@ jobs:
         with:
           name: manager-gen
           path: pkg/
-        
-      - name: Build image
-        run: docker build . -f Dockerfile -t $IMAGE_NAME
+
+      - name: Dowloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: imageid
+          path: ./out
+
+      - name: Getting image id
+        run: |
+          IMAGE_ID=$(echo `cat ./out/imageid.conf`)
+          echo IMAGE_ID=$IMAGE_ID >> $GITHUB_ENV
 
       - name: Login to GitHub Packages Docker Registry
         uses: docker/login-action@v1
@@ -115,21 +125,13 @@ jobs:
           registry: docker.pkg.github.com
           username: ${{ secrets.GITPKGS_USERNAME }}
           password: ${{ secrets.GITPKGS_PASSWORD }}
-
-      - name: Getting tag
-        run: |
-          VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
-          [ "$VERSION" == "main" ] && VERSION=latest
-          [ "$VERSION" == "" ] && VERSION=unstable 
-          echo VERSION=$VERSION >> $GITHUB_ENV
+        
+      - name: Build image
+        run: docker build . -f Dockerfile -t $IMAGE_ID
 
       - name: Push image
         run: |
-          IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID
 
   deploy:
     name: Deploy
