@@ -22,11 +22,12 @@ import (
 
 // PpwSpec defines the desired state of Ppw
 type PpwSpec struct {
+	Server Server `json:"server,omitempty"`
+}
 
-	// Foo is an example field of Ppw. Edit Ppw_types.go to remove/update
-	Size int32 `json:"size"`
-
-	StorageClassName string `json:"storageClassName"`
+type Server struct {
+	Size  int32  `json:"size,omitempty"`
+	Image string `json:"image,omitempty"`
 }
 
 // PpwStatus defines the observed state of Ppw

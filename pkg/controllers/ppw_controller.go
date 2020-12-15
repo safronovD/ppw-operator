@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"reflect"
 
 	"github.com/go-logr/logr"
@@ -68,30 +67,12 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	foundPVC := &corev1.PersistentVolumeClaim{}
-	err = r.Get(ctx, types.NamespacedName{Name: "data-pvc", Namespace: ppw.Namespace}, foundPVC)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new deployment
-		pvc := r.PVCForPpw(ppw)
-		log.Info("Creating a new Deployment", "Deployment.Namespace", pvc.Namespace, "Deployment.Name", pvc.Name)
-		err = r.Create(ctx, pvc)
-		if err != nil {
-			log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", pvc.Namespace, "Deployment.Name", pvc.Name)
-			return ctrl.Result{}, err
-		}
-		// Deployment created successfully - return and requeue
-		return ctrl.Result{Requeue: true}, nil
-	} else if err != nil {
-		log.Error(err, "Failed to get Deployment")
-		return ctrl.Result{}, err
-	}
-
 	// Check if the deployment already exists, if not create a new one
 	found := &appsv1.Deployment{}
 	err = r.Get(ctx, types.NamespacedName{Name: ppw.Name, Namespace: ppw.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new deployment
-		dep := r.deploymentForPpw(ppw)
+		dep := r.ServerDeployment(ppw)
 		log.Info("Creating a new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
 		err = r.Create(ctx, dep)
 		if err != nil {
@@ -106,7 +87,7 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	// Ensure the deployment size is the same as the spec
-	size := ppw.Spec.Size
+	size := ppw.Spec.Server.Size
 	if *found.Spec.Replicas != size {
 		found.Spec.Replicas = &size
 		err = r.Update(ctx, found)
@@ -144,9 +125,10 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func (r *PpwReconciler) deploymentForPpw(ppw *appsv1alpha0.Ppw) *appsv1.Deployment {
+func (r *PpwReconciler) ServerDeployment(ppw *appsv1alpha0.Ppw) *appsv1.Deployment {
 	ls := labelsForPpw(ppw.Name)
-	replicas := ppw.Spec.Size
+	replicas := ppw.Spec.Server.Size
+	image := ppw.Spec.Server.Image
 
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -163,23 +145,11 @@ func (r *PpwReconciler) deploymentForPpw(ppw *appsv1alpha0.Ppw) *appsv1.Deployme
 					Labels: ls,
 				},
 				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{{
-						Name: "data-volume",
-						VolumeSource: corev1.VolumeSource{
-							PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-								ClaimName: "data-pvc",
-								ReadOnly:  false,
-							}},
-					}},
 					Containers: []corev1.Container{{
-						Image: "dxd360/ppw-server",
+						Image: image,
 						Name:  "ppw-server",
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 666,
-						}},
-						VolumeMounts: []corev1.VolumeMount{{
-							Name:      "data-pvc",
-							MountPath: "/usr/src/app/data",
 						}},
 					}},
 				},
@@ -188,29 +158,6 @@ func (r *PpwReconciler) deploymentForPpw(ppw *appsv1alpha0.Ppw) *appsv1.Deployme
 	}
 	ctrl.SetControllerReference(ppw, dep, r.Scheme)
 	return dep
-}
-
-func (r *PpwReconciler) PVCForPpw(ppw *appsv1alpha0.Ppw) *corev1.PersistentVolumeClaim {
-	storageClassName := ppw.Spec.StorageClassName
-
-	pvc := &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "data-pvc",
-			Namespace: ppw.Namespace,
-		},
-		Spec: corev1.PersistentVolumeClaimSpec{
-			AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteMany},
-			StorageClassName: &storageClassName,
-			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{
-					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse("10Gi"),
-				},
-			},
-		},
-	}
-
-	ctrl.SetControllerReference(ppw, pvc, r.Scheme)
-	return pvc
 }
 
 func labelsForPpw(name string) map[string]string {
