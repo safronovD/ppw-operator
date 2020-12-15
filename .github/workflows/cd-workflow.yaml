@@ -121,6 +121,7 @@ jobs:
           VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
           [ "$VERSION" == "main" ] && VERSION=latest
+          [ "$VERSION" == "" ] && VERSION=unstable 
           echo VERSION=$VERSION >> $GITHUB_ENV
 
       - name: Push image
