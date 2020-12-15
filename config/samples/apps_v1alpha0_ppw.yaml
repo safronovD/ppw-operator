@@ -3,5 +3,6 @@ kind: Ppw
 metadata:
   name: ppw-sample
 spec:
-  size: 2
-  storageClassName: standard
+  server:
+    size:
+    image:

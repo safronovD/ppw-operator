@@ -22,11 +22,21 @@ import (
 
 // PpwSpec defines the desired state of Ppw
 type PpwSpec struct {
+	Processor struct {
+		Size    int32  `json:"size"`
+		PvcName string `json:"pvcName"`
+		Image   string `json:"image"`
+	} `json:"processor"`
 
-	// Foo is an example field of Ppw. Edit Ppw_types.go to remove/update
-	Size int32 `json:"size"`
+	Server struct {
+		Size  int32  `json:"size"`
+		Image string `json:"image"`
+	} `json:"server"`
 
-	StorageClassName string `json:"storageClassName"`
+	mlController struct {
+		PvcName string `json:"pvcName"`
+		Image   string `json:"image"`
+	}
 }
 
 // PpwStatus defines the observed state of Ppw
