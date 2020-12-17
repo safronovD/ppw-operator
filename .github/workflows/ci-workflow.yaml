@@ -1,4 +1,4 @@
-name: CI on Dev Workflow
+name: Build and test development
 
 on:
   push:
