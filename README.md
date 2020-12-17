@@ -1,4 +1,5 @@
 ![Deployment Google Cloud](https://github.com/safronovD/ppw-operator/workflows/Deployment%20Google%20Cloud/badge.svg?branch=dev&event=push)
+![Build and test development](https://github.com/safronovD/ppw-operator/workflows/Build%20and%20test%20development/badge.svg?branch=dev&event=push)
 # ppw-operator
 
 Operator for https://github.com/safronovD/python-pravega-writer
