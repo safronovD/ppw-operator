@@ -1,4 +1,4 @@
-name: CD on Main Workflow
+name: Deployment Google Cloud
 
 on:
   push:
