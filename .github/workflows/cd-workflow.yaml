@@ -1,0 +1,168 @@
+name: Deployment Google Cloud
+
+on:
+  push:
+    branches: [main, dev]
+    tags: [v*]
+
+  pull_request:
+  
+env: 
+  IMAGE_NAME: ppw-operator
+  IMAGE_REGISTRY: docker.pkg.github.com
+
+jobs:
+  tagging:
+    name: Image ID creating
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Getting tag
+        run: |
+          VER_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VER_REF | sed -e 's/^v//')
+          [ "$VERSION" == "main" ] && VERSION=latest
+          [ "$VERSION" == "" ] && VERSION=unstable
+          echo VERSION=$VERSION >> $GITHUB_ENV
+
+      - name: Creating image tag
+        run: |
+          IMAGE_ID=$IMAGE_REGISTRY/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          echo IMAGE_ID=$IMAGE_ID >> $GITHUB_ENV
+
+      - name: Collecting image id with cersion
+        run: |
+          mkdir ./out/
+          echo $IMAGE_ID:$VERSION > ./out/imageid.conf
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: imageid
+          path: ./out
+
+  build:
+    name: Generate dependencies
+    runs-on: ubuntu-18.04
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    needs: [tagging]
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - uses: actions/setup-go@v2.1.3
+        with:
+          go-version: ^1.15
+
+      - name: Setup environment
+        run: |
+          sudo apt update && sudo apt install build-essential
+          export GOBIN=$GOPATH/bin
+          echo GOBIN=`go env GOPATH`/bin >> $GITHUB_ENV
+
+      - name: Dowloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: imageid
+          path: ./out
+
+      - name: Dependencies
+        run: |
+          make all-dependencies
+          make generate-deepcopy
+
+      - name: Generate deploy yamls
+        run: |
+          IMAGE_ID=$(echo `cat ./out/imageid.conf`)
+          echo IMAGE_ID=$IMAGE_ID >> $GITHUB_ENV
+          echo IMAGE_ID=$IMAGE_ID
+          make create-dir
+          make generate-crds
+          make kustomize-crds
+          make kustomize-controller IMG=$IMAGE_ID
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: manager-gen
+          path: pkg/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: yaml-files
+          path: deploy/
+    
+  dockerize:
+    name: Dockerize ppw-operator
+    runs-on: ubuntu-18.04
+    needs: [build]
+    if: "!contains(github.event.head_commit.message, 'pkg')"
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Downloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: manager-gen
+          path: pkg/
+
+      - name: Dowloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: imageid
+          path: ./out
+
+      - name: Getting image id
+        run: |
+          IMAGE_ID=$(echo `cat ./out/imageid.conf`)
+          echo IMAGE_ID=$IMAGE_ID >> $GITHUB_ENV
+
+      - name: Login to GitHub Packages Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ secrets.GITPKGS_USERNAME }}
+          password: ${{ secrets.GITPKGS_PASSWORD }}
+        
+      - name: Build image
+        run: docker build . -f Dockerfile -t $IMAGE_ID
+
+      - name: Push image
+        run: |
+          docker push $IMAGE_ID
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-18.04
+    needs: [dockerize]
+    if: "!contains(github.event.head_commit.message, 'cd skip')"
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      # Setup gcloud CLI
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      # Configure Docker to use the gcloud command-line tool as a credential
+      # helper for authentication
+      - run: |-
+          gcloud --quiet auth configure-docker
+      # Get the GKE credentials so we can deploy to the cluster
+      - run: |-
+          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GCE_ZONE }}
+
+      - name: Downloading artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+          name: yaml-files
+          path: deploy/
+
+      - name: Kubectl deploy
+        run: |
+          kubectl apply -f ./deploy/crd.yaml
+          kubectl apply -f ./deploy/controller.yaml

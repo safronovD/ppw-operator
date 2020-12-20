@@ -29,6 +29,7 @@ spec:
         - --enable-leader-election
         image: controller:latest
         name: manager
+        imagePullPolicy: Always
         resources:
           limits:
             cpu: 100m
@@ -36,4 +37,6 @@ spec:
           requests:
             cpu: 100m
             memory: 20Mi
+      imagePullSecrets:
+        - name: github-pkg
       terminationGracePeriodSeconds: 10

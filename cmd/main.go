@@ -27,8 +27,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	appsv1alpha0 "github.com/safronovD/ppw-operator/api/v1alpha0"
-	"github.com/safronovD/ppw-operator/controllers"
+	appsv1alpha0 "github.com/safronovD/ppw-operator/pkg/api/v1alpha0"
+	"github.com/safronovD/ppw-operator/pkg/controllers"
 	// +kubebuilder:scaffold:imports
 )
 

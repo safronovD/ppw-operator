@@ -3,6 +3,7 @@ kind: Ppw
 metadata:
   name: ppw-sample
 spec:
-  size: 2
-  storageClassName: standard
-
+  server:
+    size: 2
+    image: docker.pkg.github.com/safronovd/python-pravega-writer/ppw-server:latest
+    imagePullSecret: github-pkg
