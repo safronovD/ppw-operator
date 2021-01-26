@@ -186,7 +186,7 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) { //TOD
 	podList := &corev1.PodList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(ppw.Namespace),
-		client.MatchingLabels(labelsForPpw(ppw.Name)),
+		client.MatchingLabels(map[string]string{"app": "ppw-server"}),
 	}
 	if err = r.List(ctx, podList, listOpts...); err != nil {
 		log.Error(err, "Failed to list pods", "Ppw.Namespace", ppw.Namespace, "Ppw.Name", ppw.Name)
