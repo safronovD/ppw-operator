@@ -22,13 +22,49 @@ import (
 
 // PpwSpec defines the desired state of Ppw
 type PpwSpec struct {
-	Server Server `json:"server,omitempty"`
+	Server     Server     `json:"server,omitempty"`
+	Processor  Processor  `json:"processor,omitempty"`
+	Controller Controller `json:"controller,omitempty"`
+	DataVolume DataVolume `json:"dataVolume,omitempty"`
+	Service    Service    `json:"service,omitempty"`
 }
 
 type Server struct {
+	Name            string `json:"name,omitempty"`
+	Label           string `json:"label,omitempty"`
 	Size            int32  `json:"size,omitempty"`
 	Image           string `json:"image,omitempty"`
 	ImagePullSecret string `json:"imagePullSecret,omitempty"`
+}
+
+type Processor struct {
+	Name            string `json:"name,omitempty"`
+	Label           string `json:"label,omitempty"`
+	Size            int32  `json:"size,omitempty"`
+	VolumeClaimName string `json:"volumeClaimName,omitempty"`
+	Image           string `json:"image,omitempty"`
+	ImagePullSecret string `json:"imagePullSecret,omitempty"`
+	VolumeMountPath string `json:"volumeMountPath,omitempty"`
+}
+
+type Controller struct {
+	Name            string `json:"name,omitempty"`
+	Lifetime        int32 `json:"lifetime,omitempty"`
+	VolumeClaimName string `json:"volumeClaimName,omitempty"`
+	Image           string `json:"image,omitempty"`
+	ImagePullSecret string `json:"imagePullSecret,omitempty"`
+	VolumeMountPath string `json:"volumeMountPath,omitempty"`
+}
+
+type DataVolume struct {
+	Name             string `json:"name,omitempty"`
+	Size             string `json:"size,omitempty"`
+	StorageClassName string `json:"storageClassName,omitempty"`
+}
+
+type Service struct {
+	Name            string `json:"name,omitempty"`
+	Label           string `json:"label,omitempty"`
 }
 
 // PpwStatus defines the observed state of Ppw
