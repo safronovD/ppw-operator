@@ -2,7 +2,7 @@ name: Build and test development
 
 on:
   push:
-    branches: [dev]
+    branches: [dev, master]
 
 env:
   IMG: ppw-operator
