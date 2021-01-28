@@ -71,6 +71,40 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) { //TOD
 		return ctrl.Result{}, err
 	}
 
+	//Check data volume and create a new one if need it
+	datavolume := &corev1.PersistentVolumeClaim{}
+	err = r.Get(ctx, types.NamespacedName{Name: ppw.Spec.DataVolume.Name, Namespace: ppw.Namespace}, datavolume)
+	if err != nil && errors.IsNotFound(err) {
+		pvc := r.PersistentVolume(ppw)
+		log.Info("Creating a new PVC", "PVC.Namespace", pvc.Namespace, "PVC.Name", pvc.Name)
+		err = r.Create(ctx, pvc)
+		if err != nil {
+			log.Error(err,"Failed to create PVC", "PVC.Namespace", pvc.Namespace, "PVC.Name", pvc.Name)
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{Requeue: true}, nil
+	} else if err != nil {
+		log.Error(err, "Failed to get PVC")
+		return ctrl.Result{}, err
+	}
+
+	//Check ml job and create a new one
+	mlcontroller := &batch1.Job{}
+	err = r.Get(ctx, types.NamespacedName{Name: ppw.Spec.Controller.Name, Namespace: ppw.Namespace}, mlcontroller)
+	if err != nil && errors.IsNotFound(err) {
+		mljob := r.MlControllerJob(ppw)
+		log.Info("Creating ML Job", "Job.Namespace", mljob.Namespace, "Jab.Name", mljob.Name)
+		err = r.Create(ctx, mljob)
+		if err != nil {
+			log.Error(err, "Failed to create ML Job", "Job.Namespace", mljob.Namespace, "Job.Name", mljob.Name)
+			return ctrl.Result{}, err
+		}
+		return  ctrl.Result{Requeue: true}, nil
+	} else if err != nil {
+		log.Error(err, "Failed to get ML Job")
+		return ctrl.Result{}, err
+	}
+
 	// Check if the ppw-server deployment already exists, if not create a new one
 	server := &appsv1.Deployment{}
 	err = r.Get(ctx, types.NamespacedName{Name: ppw.Spec.Server.Name, Namespace: ppw.Namespace}, server)
@@ -145,39 +179,6 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) { //TOD
 		return ctrl.Result{Requeue: true}, nil
 	} else if err != nil {
 		log.Error(err, "Failed to get PPW-Server service")
-		return ctrl.Result{}, err
-	}
-
-	//Check data volume and create a new one if need it
-	datavolume := &corev1.PersistentVolumeClaim{}
-	err = r.Get(ctx, types.NamespacedName{Name: ppw.Spec.DataVolume.Name, Namespace: ppw.Namespace}, datavolume)
-	if err != nil && errors.IsNotFound(err) {
-		pvc := r.PersistentVolume(ppw)
-		log.Info("Creating a new PVC", "PVC.Namespace", pvc.Namespace, "PVC.Name", pvc.Name)
-		err = r.Create(ctx, pvc)
-		if err != nil {
-			log.Error(err,"Failed to create PVC", "PVC.Namespace", pvc.Namespace, "PVC.Name", pvc.Name)
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{Requeue: true}, nil
-	} else if err != nil {
-		log.Error(err, "Failed to get PVC")
-		return ctrl.Result{}, err
-	}
-	//Check ml job and create a new one
-	mlcontroller := &batch1.Job{}
-	err = r.Get(ctx, types.NamespacedName{Name: ppw.Spec.Controller.Name, Namespace: ppw.Namespace}, mlcontroller)
-	if err != nil && errors.IsNotFound(err) {
-		mljob := r.MlControllerJob(ppw)
-		log.Info("Creating ML Job", "Job.Namespace", mljob.Namespace, "Jab.Name", mljob.Name)
-		err = r.Create(ctx, mljob)
-		if err != nil {
-			log.Error(err, "Failed to create ML Job", "Job.Namespace", mljob.Namespace, "Job.Name", mljob.Name)
-			return ctrl.Result{}, err
-		}
-		return  ctrl.Result{Requeue: true}, nil
-	} else if err != nil {
-		log.Error(err, "Failed to get ML Job")
 		return ctrl.Result{}, err
 	}
 
