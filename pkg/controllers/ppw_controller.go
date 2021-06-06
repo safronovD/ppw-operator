@@ -24,8 +24,8 @@ import (
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	batch1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -50,7 +50,7 @@ type PpwReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list
 // +kubebuilder:rbac:groups=core,resources=persistentvolumecla ims,verbs=get;list;watch;create;update;patch;delete;
 
-func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) { //TODO: Добавить реализацию деплоймента для процессора
+func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	ctx := context.Background()
 	log := r.Log.WithValues("ppw", req.NamespacedName)
@@ -205,7 +205,7 @@ func (r *PpwReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) { //TOD
 		}
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{Requeue: false}, nil
 }
 
 func (r *PpwReconciler) ServerDeployment(ppw *appsv1alpha0.Ppw) *appsv1.Deployment {
